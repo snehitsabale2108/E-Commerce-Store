@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ app_tagline }} - Fresh groceries delivered fast to your doorstep">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="{{ url_for('main.index') }}">
+                <i class="bi bi-basket3-fill me-2"></i>{{ app_name }}
+            </a>
+            
+            <!-- Search Bar -->
+            <div class="mx-auto d-none d-lg-block" style="max-width: 400px; width: 100%;">
+                <form action="{{ url_for('products.listing') }}" method="get" class="position-relative">
+                    <input type="text" name="q" class="form-control search-input" placeholder="Search for products..." id="searchInput">
+                    <i class="bi bi-search search-icon"></i>
+                    <div id="searchResults" class="search-results"></div>
+                </form>
+            </div>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" id="themeToggle" title="Toggle dark mode">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('wishlist.view_wishlist') }}">
+                            <i class="bi bi-heart"></i>
+                            <span class="badge bg-danger badge-notification" id="wishlistCount">{{ wishlist_count }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ url_for('cart.view_cart') }}">
+                            <i class="bi bi-cart3"></i>
+                            <span class="badge bg-primary badge-notification" id="cartCount">{{ cart_count }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('orders.history') }}"><i class="bi bi-bag-check me-2"></i>My Orders</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('wishlist.view_wishlist') }}"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
+                            {% if current_user.is_admin %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-outline-primary btn-sm ms-2" href="{{ url_for('auth.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary btn-sm ms-2" href="{{ url_for('auth.signup') }}">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- AI Chat Widget -->
+    {% if current_user.is_authenticated or true %}
+    <div id="aiChatWidget" class="ai-chat-widget">
+        <button class="ai-chat-toggle" id="aiChatToggle">
+            <i class="bi bi-robot"></i>
+        </button>
+        <div class="ai-chat-window" id="aiChatWindow">
+            <div class="ai-chat-header">
+                <div>
+                    <h6 class="mb-0"><i class="bi bi-robot me-2"></i>Freshie - AI Assistant</h6>
+                    <small class="text-muted">Powered by IBM Watsonx.ai</small>
+                </div>
+                <button class="btn-close btn-close-white" id="aiChatClose"></button>
+            </div>
+            <div class="ai-chat-messages" id="aiChatMessages">
+                <div class="ai-message">
+                    <div class="ai-avatar"><i class="bi bi-robot"></i></div>
+                    <div class="ai-bubble">
+                        <p>🙏 Namaste! I'm <strong>Freshie</strong>, your FreshMart AI Shopping Assistant! 🛒</p>
+                        <p class="mb-0">How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-chat-quick-replies" id="aiQuickReplies">
+                <button class="quick-reply-btn">🥗 Suggest a healthy breakfast</button>
+                <button class="quick-reply-btn">🍛 Ingredients for Dal Makhani</button>
+                <button class="quick-reply-btn">💰 Budget meal under ₹200</button>
+                <button class="quick-reply-btn">🔄 What can replace paneer?</button>
+            </div>
+            <div class="ai-chat-input">
+                <input type="text" id="aiChatInput" placeholder="Ask me anything..." maxlength="1000">
+                <button id="aiChatSend"><i class="bi bi-send-fill"></i></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-basket3-fill me-2"></i>{{ app_name }}</h5>
+                    <p class="text-white-75">{{ app_tagline }}</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('products.listing') }}" class="text-white-75 text-decoration-none">Shop All Products</a></li>
+                        <li><a href="{{ url_for('products.listing', category='fruits-vegetables') }}" class="text-white-75 text-decoration-none">Fresh Produce</a></li>
+                        <li><a href="{{ url_for('products.listing', category='dairy-eggs') }}" class="text-white-75 text-decoration-none">Dairy & Eggs</a></li>
+                        <li><a href="{{ url_for('products.listing', sort='discount') }}" class="text-white-75 text-decoration-none">Offers & Deals</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">Customer Care</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white-75 text-decoration-none">Help Center</a></li>
+                        <li><a href="#" class="text-white-75 text-decoration-none">Track Order</a></li>
+                        <li><a href="#" class="text-white-75 text-decoration-none">Return Policy</a></li>
+                        <li><a href="#" class="text-white-75 text-decoration-none">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">Contact</h6>
+                    <p class="text-white-75 mb-2"><i class="bi bi-telephone me-2"></i>1800-123-4567</p>
+                    <p class="text-white-75 mb-2"><i class="bi bi-envelope me-2"></i>support@freshmart.com</p>
+                    <p class="text-white-75 mb-0"><i class="bi bi-clock me-2"></i>24/7 Support</p>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-white-75 mb-0">&copy; 2025 {{ app_name }}. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="text-white-75 mb-0">Powered by IBM Watsonx.ai 🤖</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

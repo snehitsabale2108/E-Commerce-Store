@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} - {{ app_tagline }}{% endblock %}
+
+{% block content %}
+<!-- Hero Banner Carousel -->
+<section class="hero-section">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for banner in banners %}
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ loop.index0 }}" class="{{ 'active' if loop.first }}" aria-label="Slide {{ loop.index }}"></button>
+            {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            {% for banner in banners %}
+            <div class="carousel-item {{ 'active' if loop.first }}">
+                <div class="hero-banner" style="background: linear-gradient(135deg, {{ banner.bg_color }} 0%, {{ banner.bg_color }}dd 100%);">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6" data-aos="fade-right">
+                                <h1 class="display-4 fw-bold text-white mb-3">{{ banner.title }}</h1>
+                                <p class="lead text-white-75 mb-4">{{ banner.subtitle }}</p>
+                                <a href="{{ banner.link }}" class="btn btn-light btn-lg px-4 shadow-sm">
+                                    {{ banner.button_text }} <i class="bi bi-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                            <div class="col-lg-6 text-center d-none d-lg-block" data-aos="fade-left">
+                                <div class="hero-image-placeholder">
+                                    <i class="bi bi-basket3" style="font-size: 10rem; color: rgba(255,255,255,0.3);"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-4" data-aos="fade-up">Shop by Category</h2>
+        <div class="row g-3">
+            {% for category in categories %}
+            <div class="col-6 col-md-4 col-lg-2" data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 50 }}">
+                <a href="{{ url_for('products.listing', category=category.slug) }}" class="category-card text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm hover-lift text-center">
+                        <div class="card-body">
+                            <div class="category-icon" style="background: {{ category.color }}22; color: {{ category.color }};">
+                                <span style="font-size: 2.5rem;">{{ category.icon }}</span>
+                            </div>
+                            <h6 class="mt-3 mb-0">{{ category.name }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0" data-aos="fade-right">Featured Products</h2>
+            <a href="{{ url_for('products.listing') }}" class="btn btn-outline-primary btn-sm" data-aos="fade-left">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for product in featured_products %}
+            <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 50 }}">
+                {% include 'products/_product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Trending Products -->
+{% if trending_products %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0" data-aos="fade-right">🔥 Trending Now</h2>
+            <a href="{{ url_for('products.listing', sort='popular') }}" class="btn btn-outline-primary btn-sm" data-aos="fade-left">See All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for product in trending_products %}
+            <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 50 }}">
+                {% include 'products/_product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Offers -->
+{% if offer_products %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0" data-aos="fade-right">💰 Special Offers</h2>
+            <a href="{{ url_for('products.listing', sort='discount') }}" class="btn btn-outline-danger btn-sm" data-aos="fade-left">See Deals <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for product in offer_products %}
+            <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 50 }}">
+                {% include 'products/_product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Why Choose Us -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <h2 class="section-title text-center text-white mb-5" data-aos="fade-up">Why Choose FreshMart?</h2>
+        <div class="row g-4">
+            <div class="col-md-3 text-center" data-aos="zoom-in">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-truck" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Fast Delivery</h5>
+                <p class="text-white-75">Get your order in under 2 hours</p>
+            </div>
+            <div class="col-md-3 text-center" data-aos="zoom-in" data-aos-delay="100">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-shield-check" style="font-size: 3rem;"></i>
+                </div>
+                <h5>100% Quality</h5>
+                <p class="text-white-75">Fresh products, every single time</p>
+            </div>
+            <div class="col-md-3 text-center" data-aos="zoom-in" data-aos-delay="200">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-credit-card" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Secure Payments</h5>
+                <p class="text-white-75">Multiple payment options, 100% safe</p>
+            </div>
+            <div class="col-md-3 text-center" data-aos="zoom-in" data-aos-delay="300">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-headset" style="font-size: 3rem;"></i>
+                </div>
+                <h5>24/7 Support</h5>
+                <p class="text-white-75">We're here whenever you need us</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

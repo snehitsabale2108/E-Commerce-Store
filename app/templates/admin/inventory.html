@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% block title %}Inventory - Admin{% endblock %}
+{% block page_title %}Inventory Management{% endblock %}
+{% block admin_content %}
+{% if out_of_stock %}
+<div class="alert alert-danger"><i class="bi bi-x-circle-fill me-2"></i><strong>{{ out_of_stock|length }} products out of stock!</strong> Restock immediately.</div>
+{% endif %}
+{% if low_stock_products %}
+<div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>{{ low_stock_products|length }} products have low stock.</strong> Consider restocking soon.</div>
+{% endif %}
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-danger text-white"><i class="bi bi-x-circle me-2"></i>Out of Stock ({{ out_of_stock|length }})</div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Product</th><th>Category</th><th>Action</th></tr></thead>
+          <tbody>
+            {% for p in out_of_stock %}
+            <tr>
+              <td><strong>{{ p.name }}</strong><br><small class="text-muted">{{ p.brand }}</small></td>
+              <td><small>{{ p.category.name }}</small></td>
+              <td><a href="{{ url_for('admin.edit_product', product_id=p.id) }}" class="btn btn-sm btn-primary">Restock</a></td>
+            </tr>
+            {% endfor %}
+            {% if not out_of_stock %}<tr><td colspan="3" class="text-center text-muted py-3">✅ No out of stock products</td></tr>{% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-warning text-dark"><i class="bi bi-exclamation-triangle me-2"></i>Low Stock ({{ low_stock_products|length }})</div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Product</th><th>Stock</th><th>Alert At</th><th>Action</th></tr></thead>
+          <tbody>
+            {% for p in low_stock_products %}
+            <tr>
+              <td><strong>{{ p.name }}</strong></td>
+              <td><span class="badge bg-warning text-dark">{{ p.stock }}</span></td>
+              <td><span class="text-muted">{{ p.min_stock_alert }}</span></td>
+              <td><a href="{{ url_for('admin.edit_product', product_id=p.id) }}" class="btn btn-sm btn-warning">Update</a></td>
+            </tr>
+            {% endfor %}
+            {% if not low_stock_products %}<tr><td colspan="4" class="text-center text-muted py-3">✅ All products well-stocked</td></tr>{% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

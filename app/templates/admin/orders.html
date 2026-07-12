@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% block title %}Orders - Admin{% endblock %}
+{% block page_title %}Order Management{% endblock %}
+{% block admin_content %}
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  {% for status, label in [('', 'All'), ('placed', 'Placed'), ('confirmed', 'Confirmed'), ('packed', 'Packed'), ('out_for_delivery', 'Out for Delivery'), ('delivered', 'Delivered'), ('cancelled', 'Cancelled')] %}
+  <a href="{{ url_for('admin.orders', status=status) }}" class="btn btn-sm {{ 'btn-primary' if status_filter == status else 'btn-outline-secondary' }}">{{ label }}</a>
+  {% endfor %}
+</div>
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light"><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Slot</th><th>Status</th><th>Date</th><th>Update Status</th></tr></thead>
+      <tbody>
+        {% for order in orders.items %}
+        {% set status_colors = {'placed': 'primary', 'confirmed': 'info', 'packed': 'warning', 'out_for_delivery': 'primary', 'delivered': 'success', 'cancelled': 'danger', 'refunded': 'secondary'} %}
+        <tr>
+          <td><strong>#{{ order.order_number }}</strong></td>
+          <td><small>{{ order.user.name }}<br>{{ order.user.email }}</small></td>
+          <td><small>{{ order.items.count() }} items</small></td>
+          <td><strong>₹{{ order.total }}</strong></td>
+          <td><span class="badge bg-secondary">{{ order.payment_method.upper() }}</span><br><span class="badge {{ 'bg-success' if order.payment_status == 'paid' else 'bg-warning text-dark' }}">{{ order.payment_status }}</span></td>
+          <td><small>{{ order.delivery_slot or '—' }}</small></td>
+          <td><span class="badge bg-{{ status_colors.get(order.status, 'secondary') }}">{{ order.STATUS_LABELS.get(order.status, order.status) }}</span></td>
+          <td><small class="text-muted">{{ order.created_at.strftime('%d %b %y') }}</small></td>
+          <td>
+            <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="post" class="d-flex gap-1">
+              <select name="status" class="form-select form-select-sm" style="width: 140px;">
+                {% for s, label in order.STATUS_LABELS.items() %}
+                <option value="{{ s }}" {{ 'selected' if s == order.status }}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-sm btn-primary">✓</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if orders.pages > 1 %}
+  <div class="card-footer">
+    <nav><ul class="pagination justify-content-center mb-0">
+      {% if orders.has_prev %}<li class="page-item"><a class="page-link" href="?page={{ orders.prev_num }}&status={{ status_filter }}">«</a></li>{% endif %}
+      {% for page in orders.iter_pages() %}
+        {% if page %}<li class="page-item {{ 'active' if page == orders.page }}"><a class="page-link" href="?page={{ page }}&status={{ status_filter }}">{{ page }}</a></li>
+        {% else %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+      {% endfor %}
+      {% if orders.has_next %}<li class="page-item"><a class="page-link" href="?page={{ orders.next_num }}&status={{ status_filter }}">»</a></li>{% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

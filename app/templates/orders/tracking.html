@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Track Order - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-2">Track Order</h2>
+  <p class="text-muted">Order #{{ order.order_number }}</p>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Order Status Tracker -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4">Order Status</h5>
+          {% set status_steps = [('placed', 'Order Placed', 'bi-check-circle-fill'), ('confirmed', 'Confirmed', 'bi-clipboard-check'), ('packed', 'Packed', 'bi-box'), ('out_for_delivery', 'Out for Delivery', 'bi-truck'), ('delivered', 'Delivered', 'bi-house-check-fill')] %}
+          {% set current_idx = order.STATUS_ORDER.index(order.status) if order.status in order.STATUS_ORDER else 0 %}
+          <div class="order-tracker">
+            {% for step_status, step_label, step_icon in status_steps %}
+            {% set step_idx = loop.index0 %}
+            <div class="tracker-step {{ 'completed' if step_idx <= current_idx else '' }} {{ 'active' if step_idx == current_idx else '' }}">
+              <div class="tracker-icon">
+                <i class="bi {{ step_icon }}"></i>
+              </div>
+              <div class="tracker-content">
+                <strong>{{ step_label }}</strong>
+                {% for h in history %}
+                  {% if h.status == step_status %}<p class="text-muted small mb-0">{{ h.message }}</p>{% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% if not loop.last %}
+            <div class="tracker-line {{ 'completed' if step_idx < current_idx else '' }}"></div>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% if order.status == 'cancelled' %}
+          <div class="alert alert-danger mt-3"><i class="bi bi-x-circle me-2"></i>This order has been cancelled.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Order Items</h5>
+          {% for item in order.items %}
+          <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3">
+            <img src="{{ url_for('static', filename='images/products/' + (item.product.image if item.product else 'default_product.png')) }}" 
+                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" alt="{{ item.product_name }}"
+                 onerror="this.src='{{ url_for('static', filename='images/default_product.png') }}'">
+            <div class="flex-grow-1">
+              <h6 class="mb-0">{{ item.product_name }}</h6>
+              <small class="text-muted">Qty: {{ item.quantity }} × ₹{{ item.unit_price }}</small>
+            </div>
+            <span class="fw-semibold">₹{{ item.subtotal }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Order Details</h5>
+          <div class="detail-row"><span class="text-muted">Order No.</span><strong>#{{ order.order_number }}</strong></div>
+          <div class="detail-row"><span class="text-muted">Placed on</span><span>{{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</span></div>
+          <div class="detail-row"><span class="text-muted">Payment</span><span class="text-capitalize">{{ order.payment_method.replace('_', ' ') }} <span class="badge {{ 'bg-success' if order.payment_status == 'paid' else 'bg-warning text-dark' }}">{{ order.payment_status }}</span></span></div>
+          <div class="detail-row"><span class="text-muted">Delivery Slot</span><span>{{ order.delivery_slot or 'Not set' }}</span></div>
+          <hr>
+          <div class="detail-row"><span class="text-muted">Subtotal</span><span>₹{{ order.subtotal }}</span></div>
+          <div class="detail-row"><span class="text-muted">Tax</span><span>₹{{ order.tax }}</span></div>
+          <div class="detail-row"><span class="text-muted">Delivery</span><span>{{ 'FREE' if order.delivery_fee == 0 else '₹' + order.delivery_fee|string }}</span></div>
+          {% if order.discount > 0 %}<div class="detail-row"><span class="text-muted">Discount</span><span class="text-success">-₹{{ order.discount }}</span></div>{% endif %}
+          <hr>
+          <div class="detail-row"><strong>Total</strong><strong class="text-success">₹{{ order.total }}</strong></div>
+        </div>
+      </div>
+      <!-- Delivery Address -->
+      {% if order.address %}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Delivery Address</h5>
+          <strong>{{ order.address.full_name }}</strong>
+          <p class="text-muted small mb-1">{{ order.address.address_line1 }}, {{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</p>
+          <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ order.address.phone }}</small>
+        </div>
+      </div>
+      {% endif %}
+      <!-- Actions -->
+      <div class="d-flex gap-2">
+        <form action="{{ url_for('orders.reorder', order_id=order.id) }}" method="post" class="flex-grow-1">
+          <button type="submit" class="btn btn-primary w-100"><i class="bi bi-arrow-repeat me-2"></i>Reorder</button>
+        </form>
+        {% if order.status in ['placed', 'confirmed'] %}
+        <form action="{{ url_for('orders.cancel_order', order_id=order.id) }}" method="post">
+          <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Cancel this order?')"><i class="bi bi-x-circle"></i></button>
+        </form>
+        {% endif %}
+      </div>
+      <a href="{{ url_for('orders.history') }}" class="btn btn-outline-secondary w-100 mt-2">← Back to Orders</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

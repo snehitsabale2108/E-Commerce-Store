@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('products.listing') }}">Products</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('products.listing', category=product.category.slug) }}">{{ product.category.name }}</a></li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+  </nav>
+  <div class="row g-5">
+    <!-- Product Image -->
+    <div class="col-md-5">
+      <div class="product-detail-image card border-0 shadow-sm p-4 text-center">
+        <div class="position-relative">
+          <img src="{{ url_for('static', filename='images/products/' + product.image) }}" 
+               class="img-fluid rounded" style="max-height: 380px;" alt="{{ product.name }}"
+               onerror="this.src='{{ url_for('static', filename='images/default_product.png') }}'">
+          {% if product.discount_percent > 0 %}
+          <span class="badge bg-danger position-absolute top-0 end-0">{{ product.discount_percent|int }}% OFF</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <!-- Product Info -->
+    <div class="col-md-7">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge {{ 'bg-success' if product.is_veg else 'bg-danger' }}">{{ '🌿 Veg' if product.is_veg else '🍗 Non-Veg' }}</span>
+        {% if product.brand %}<span class="badge bg-light text-dark">{{ product.brand }}</span>{% endif %}
+        <span class="badge bg-light text-dark">{{ product.category.name }}</span>
+      </div>
+      <h1 class="h2 fw-bold mb-2">{{ product.name }}</h1>
+      <p class="text-muted mb-2"><i class="bi bi-box me-1"></i>Unit: <strong>{{ product.unit }}</strong></p>
+      <!-- Rating -->
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="rating-stars">
+          {% for i in range(5) %}
+          <i class="bi bi-star-fill {{ 'text-warning' if i < product.rating_avg|int else 'text-muted' }}"></i>
+          {% endfor %}
+        </div>
+        <span class="fw-semibold">{{ product.rating_avg }}</span>
+        <span class="text-muted">({{ product.rating_count }} reviews)</span>
+      </div>
+      <!-- Price -->
+      <div class="price-section mb-4 p-3 bg-light rounded-3">
+        <div class="d-flex align-items-baseline gap-3">
+          <span class="h2 fw-bold text-success mb-0">₹{{ product.effective_price }}</span>
+          {% if product.mrp and product.mrp > product.price %}
+          <span class="h5 text-muted text-decoration-line-through">₹{{ product.mrp }}</span>
+          <span class="badge bg-danger">Save ₹{{ (product.mrp - product.effective_price)|round(2) }}</span>
+          {% endif %}
+        </div>
+        <p class="text-muted mb-0 mt-1"><i class="bi bi-info-circle me-1"></i>Inclusive of all taxes</p>
+      </div>
+      <!-- Stock Status -->
+      <div class="mb-4">
+        {% if product.stock > 10 %}
+        <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>In Stock ({{ product.stock }} available)</span>
+        {% elif product.stock > 0 %}
+        <span class="text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i>Only {{ product.stock }} left!</span>
+        {% else %}
+        <span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i>Out of Stock</span>
+        {% endif %}
+      </div>
+      <!-- Quantity & Add to Cart -->
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="quantity-selector d-flex align-items-center border rounded-3">
+          <button class="btn btn-sm px-3" onclick="changeQty(-1)">−</button>
+          <input type="number" id="productQty" value="1" min="1" max="{{ product.stock }}" class="form-control border-0 text-center" style="width: 60px;">
+          <button class="btn btn-sm px-3" onclick="changeQty(1)">+</button>
+        </div>
+        {% if product.stock > 0 %}
+        <button class="btn btn-primary btn-lg flex-grow-1" onclick="addToCart({{ product.id }}, parseInt(document.getElementById('productQty').value))">
+          <i class="bi bi-cart-plus me-2"></i>Add to Cart
+        </button>
+        {% else %}
+        <button class="btn btn-secondary btn-lg flex-grow-1" disabled>Out of Stock</button>
+        {% endif %}
+        <button class="btn btn-outline-danger btn-lg" onclick="toggleWishlist({{ product.id }}, this)" title="Add to Wishlist">
+          <i class="bi bi-heart"></i>
+        </button>
+      </div>
+      <!-- Description -->
+      {% if product.description %}
+      <div class="mb-4">
+        <h6 class="fw-bold">Description</h6>
+        <p class="text-muted">{{ product.description }}</p>
+      </div>
+      {% endif %}
+      <!-- Delivery info -->
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+            <i class="bi bi-truck text-primary" style="font-size: 1.5rem;"></i>
+            <div><small class="d-block fw-semibold">Fast Delivery</small><small class="text-muted">Within 2 hours</small></div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+            <i class="bi bi-arrow-counterclockwise text-success" style="font-size: 1.5rem;"></i>
+            <div><small class="d-block fw-semibold">Easy Returns</small><small class="text-muted">24 hour policy</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nutrition Info -->
+  {% if nutrition %}
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3"><i class="bi bi-clipboard-data me-2 text-primary"></i>Nutrition Information</h5>
+          <div class="row">
+            {% for key, value in nutrition.items() %}
+            <div class="col-md-3 col-6 mb-3">
+              <div class="nutrition-item text-center p-3 bg-light rounded">
+                <div class="h5 fw-bold text-primary mb-0">{{ value }}</div>
+                <small class="text-muted text-capitalize">{{ key.replace('_', ' ') }}</small>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Reviews -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Customer Reviews</h5>
+            {% if current_user.is_authenticated %}
+            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reviewModal">Write a Review</button>
+            {% endif %}
+          </div>
+          {% if reviews %}
+          {% for review in reviews %}
+          <div class="review-card border-bottom pb-3 mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <div class="review-avatar"><i class="bi bi-person-circle" style="font-size: 2rem; color: var(--bs-primary);"></i></div>
+              <div>
+                <strong>{{ review.user.name }}</strong>
+                {% if review.is_verified_purchase %}<span class="badge bg-success ms-2">Verified Purchase</span>{% endif %}
+                <div class="rating-stars small">
+                  {% for i in range(5) %}<i class="bi bi-star-fill {{ 'text-warning' if i < review.rating else 'text-muted' }}"></i>{% endfor %}
+                </div>
+              </div>
+              <small class="text-muted ms-auto">{{ review.created_at }}</small>
+            </div>
+            {% if review.title %}<p class="fw-semibold mb-1">{{ review.title }}</p>{% endif %}
+            <p class="text-muted mb-0">{{ review.body }}</p>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-4">
+            <i class="bi bi-star text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-2">No reviews yet. Be the first to review!</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related %}
+  <div class="row mt-5">
+    <div class="col-12">
+      <h4 class="fw-bold mb-4">You May Also Like</h4>
+      <div class="row g-4">
+        {% for product in related %}
+        <div class="col-6 col-md-3 col-lg-2">{% include 'products/_product_card.html' %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Write a Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="#">
+          <div class="mb-3">
+            <label class="form-label">Your Rating</label>
+            <div class="star-rating-input" id="starRating">
+              {% for i in range(1,6) %}
+              <i class="bi bi-star" data-rating="{{ i }}" style="font-size: 1.8rem; cursor: pointer;"></i>
+              {% endfor %}
+            </div>
+            <input type="hidden" name="rating" id="ratingInput" value="5">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Review Title</label>
+            <input type="text" name="title" class="form-control" placeholder="Sum up your experience">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Your Review</label>
+            <textarea name="body" class="form-control" rows="3" placeholder="Tell others what you think..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function changeQty(delta) {
+  const input = document.getElementById('productQty');
+  const max = parseInt(input.max);
+  const newVal = Math.max(1, Math.min(max, parseInt(input.value) + delta));
+  input.value = newVal;
+}
+// Star rating
+document.querySelectorAll('#starRating .bi').forEach(star => {
+  star.addEventListener('mouseover', function() {
+    const r = parseInt(this.dataset.rating);
+    document.querySelectorAll('#starRating .bi').forEach((s, i) => {
+      s.className = i < r ? 'bi bi-star-fill text-warning' : 'bi bi-star';
+    });
+  });
+  star.addEventListener('click', function() {
+    document.getElementById('ratingInput').value = this.dataset.rating;
+  });
+});
+</script>
+{% endblock %}

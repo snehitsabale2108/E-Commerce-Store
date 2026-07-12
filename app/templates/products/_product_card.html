@@ -1,0 +1,47 @@
+<a href="{{ url_for('products.detail', slug=product.slug) }}" class="text-decoration-none product-card">
+    <div class="card h-100 border-0 shadow-sm hover-lift position-relative">
+        {% if product.discount_percent > 0 %}
+        <span class="badge bg-danger position-absolute top-0 end-0 m-2">{{ product.discount_percent|int }}% OFF</span>
+        {% endif %}
+        {% if product.is_veg %}
+        <span class="badge bg-success position-absolute top-0 start-0 m-2">🌿 Veg</span>
+        {% else %}
+        <span class="badge bg-danger position-absolute top-0 start-0 m-2">🍗 Non-Veg</span>
+        {% endif %}
+        <div class="product-image-wrapper">
+            <img src="{{ url_for('static', filename='images/products/' + product.image) }}" 
+                 class="card-img-top product-image" 
+                 alt="{{ product.name }}"
+                 onerror="this.src='{{ url_for('static', filename='images/default_product.png') }}'">
+        </div>
+        <div class="card-body">
+            <h6 class="product-title mb-1">{{ product.name }}</h6>
+            <p class="text-muted small mb-2">{{ product.unit }}</p>
+            <div class="d-flex align-items-center mb-2">
+                <span class="text-warning me-1">
+                    {% for i in range(5) %}
+                        {% if i < product.rating_avg|int %}
+                        <i class="bi bi-star-fill"></i>
+                        {% else %}
+                        <i class="bi bi-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <small class="text-muted">({{ product.rating_count }})</small>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="product-price fw-bold text-success">₹{{ product.effective_price }}</span>
+                    {% if product.mrp and product.mrp > product.price %}
+                    <span class="text-muted text-decoration-line-through small ms-1">₹{{ product.mrp }}</span>
+                    {% endif %}
+                </div>
+                <button class="btn btn-sm btn-primary add-to-cart-btn" 
+                        data-product-id="{{ product.id }}" 
+                        onclick="event.preventDefault(); addToCart({{ product.id }}, 1);">
+                    <i class="bi bi-cart-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</a>

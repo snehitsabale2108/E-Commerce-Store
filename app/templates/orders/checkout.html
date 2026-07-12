@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Checkout - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="bi bi-bag-check me-2"></i>Checkout</h2>
+  <form action="{{ url_for('orders.checkout') }}" method="post" id="checkoutForm">
+    <div class="row g-4">
+      <!-- Left: Delivery & Payment -->
+      <div class="col-lg-8">
+        <!-- Delivery Address -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Delivery Address</h5>
+            {% if addresses %}
+            {% for addr in addresses %}
+            <div class="form-check address-option p-3 border rounded mb-2 {{ 'border-primary' if addr.is_default }}">
+              <input class="form-check-input" type="radio" name="address_id" value="{{ addr.id }}" id="addr{{ addr.id }}" {{ 'checked' if addr.is_default }}>
+              <label class="form-check-label" for="addr{{ addr.id }}">
+                <strong>{{ addr.label }} — {{ addr.full_name }}</strong>
+                <p class="mb-0 text-muted small">{{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ addr.phone }}</small>
+              </label>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              No saved addresses. Please <a href="{{ url_for('auth.profile') }}">add an address</a> before checkout.
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Delivery Slot -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3"><i class="bi bi-clock-fill text-primary me-2"></i>Delivery Slot</h5>
+            <div class="row g-2">
+              {% for slot in delivery_slots %}
+              <div class="col-md-4">
+                <div class="form-check delivery-slot-option p-3 border rounded {{ 'border-primary' if loop.first }}">
+                  <input class="form-check-input" type="radio" name="delivery_slot" value="{{ slot }}" id="slot{{ loop.index }}" {{ 'checked' if loop.first }}>
+                  <label class="form-check-label" for="slot{{ loop.index }}">
+                    <i class="bi bi-clock me-1"></i>{{ slot }}
+                  </label>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3"><i class="bi bi-credit-card-fill text-primary me-2"></i>Payment Method</h5>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="payment-option p-3 border rounded text-center border-primary" onclick="selectPayment('cod', this)">
+                  <input type="radio" name="payment_method" value="cod" id="pmCOD" checked class="d-none">
+                  <i class="bi bi-cash-stack" style="font-size: 2rem; color: var(--bs-success);"></i>
+                  <p class="mb-0 mt-2 fw-semibold">Cash on Delivery</p>
+                  <small class="text-muted">Pay when delivered</small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="payment-option p-3 border rounded text-center" onclick="selectPayment('upi', this)">
+                  <input type="radio" name="payment_method" value="upi" id="pmUPI" class="d-none">
+                  <i class="bi bi-phone-fill" style="font-size: 2rem; color: var(--bs-primary);"></i>
+                  <p class="mb-0 mt-2 fw-semibold">UPI</p>
+                  <small class="text-muted">PhonePe, GPay, Paytm</small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="payment-option p-3 border rounded text-center" onclick="selectPayment('card', this)">
+                  <input type="radio" name="payment_method" value="card" id="pmCard" class="d-none">
+                  <i class="bi bi-credit-card" style="font-size: 2rem; color: var(--bs-warning);"></i>
+                  <p class="mb-0 mt-2 fw-semibold">Card</p>
+                  <small class="text-muted">Debit / Credit card</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <label class="form-label fw-semibold">Order Notes (optional)</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="Any special instructions for delivery?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Order Summary -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm sticky-top" style="top: 80px;">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3">Order Summary</h5>
+            <!-- Items -->
+            {% for item in cart_items %}
+            <div class="d-flex gap-2 mb-2">
+              <img src="{{ url_for('static', filename='images/products/' + item.product.image) }}" 
+                   style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" 
+                   alt="{{ item.product.name }}"
+                   onerror="this.src='{{ url_for('static', filename='images/default_product.png') }}'">
+              <div class="flex-grow-1">
+                <small class="d-block">{{ item.product.name }}</small>
+                <small class="text-muted">x{{ item.quantity }}</small>
+              </div>
+              <small class="fw-semibold">₹{{ item.subtotal }}</small>
+            </div>
+            {% endfor %}
+            <hr>
+            <!-- Coupon Input -->
+            <div class="mb-3">
+              <input type="text" name="coupon_code" id="checkoutCoupon" class="form-control form-control-sm" placeholder="Coupon code">
+            </div>
+            <!-- Price Breakdown -->
+            <div class="d-flex justify-content-between mb-1">
+              <small class="text-muted">Subtotal</small><small>₹{{ subtotal }}</small>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <small class="text-muted">Tax (5%)</small><small>₹{{ tax }}</small>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <small class="text-muted">Delivery</small>
+              <small class="{{ 'text-success' if delivery_fee == 0 else '' }}">{{ 'FREE' if delivery_fee == 0 else '₹' + delivery_fee|string }}</small>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-4">
+              <strong>Total</strong>
+              <strong class="text-success">₹{{ (subtotal + tax + delivery_fee)|round(2) }}</strong>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+              <i class="bi bi-bag-check me-2"></i>Place Order
+            </button>
+            <p class="text-muted text-center small mt-3">🔒 Your information is secure</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function selectPayment(method, el) {
+  document.querySelectorAll('.payment-option').forEach(e => e.classList.remove('border-primary'));
+  el.classList.add('border-primary');
+  document.getElementById('pm' + method.toUpperCase()).checked = true;
+  if (method !== 'cod') document.getElementById('pm' + method.charAt(0).toUpperCase() + method.slice(1)).checked = true;
+}
+document.querySelectorAll('.delivery-slot-option').forEach(slot => {
+  slot.addEventListener('click', function() {
+    document.querySelectorAll('.delivery-slot-option').forEach(s => s.classList.remove('border-primary'));
+    this.classList.add('border-primary');
+  });
+});
+</script>
+{% endblock %}

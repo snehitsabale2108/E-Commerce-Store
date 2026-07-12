@@ -1,0 +1,90 @@
+# --- Environment & Secrets ---
+.env
+*.env
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+wheels/
+*.whl
+MANIFEST
+.Python
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Flask / SQLAlchemy ---
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Flask-Migrate (keep versions, ignore __pycache__ inside) ---
+migrations/__pycache__/
+
+# --- Uploads ---
+app/static/images/products/
+!app/static/images/products/.gitkeep
+
+# --- Logs ---
+*.log
+logs/
+flask_session/
+
+# --- Testing ---
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.tox/
+nosetests.xml
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Distribution / Packaging ---
+*.tar.gz
+*.zip
+
+# --- Staging / Production env files ---
+.env.production
+.env.staging
+
+# --- Type checking ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# --- Ruff / Linting cache ---
+.ruff_cache/

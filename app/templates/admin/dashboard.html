@@ -1,0 +1,163 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard - Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block admin_content %}
+<!-- Stat Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-primary bg-opacity-10 p-3 rounded-3"><i class="bi bi-currency-rupee text-primary fs-3"></i></div>
+        <div><p class="text-muted small mb-0">Total Revenue</p><h4 class="fw-bold mb-0">₹{{ "%.0f"|format(total_revenue) }}</h4><small class="text-success">Today: ₹{{ "%.0f"|format(today_revenue) }}</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-success bg-opacity-10 p-3 rounded-3"><i class="bi bi-bag-check text-success fs-3"></i></div>
+        <div><p class="text-muted small mb-0">Total Orders</p><h4 class="fw-bold mb-0">{{ total_orders }}</h4><small class="text-warning">{{ pending_orders }} pending</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-info bg-opacity-10 p-3 rounded-3"><i class="bi bi-people text-info fs-3"></i></div>
+        <div><p class="text-muted small mb-0">Customers</p><h4 class="fw-bold mb-0">{{ total_customers }}</h4></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-warning bg-opacity-10 p-3 rounded-3"><i class="bi bi-box-seam text-warning fs-3"></i></div>
+        <div><p class="text-muted small mb-0">Products</p><h4 class="fw-bold mb-0">{{ total_products }}</h4>
+          {% if low_stock or out_of_stock %}
+          <small class="text-danger">⚠️ {{ low_stock }} low, {{ out_of_stock }} out of stock</small>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Revenue Chart -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Revenue — Last 7 Days</h6>
+        <canvas id="revenueChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+  <!-- Top Products -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Top Selling Products</h6>
+        {% for name, qty in top_products %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small class="text-truncate" style="max-width: 170px;">{{ name }}</small>
+          <span class="badge bg-primary">{{ qty }} sold</span>
+        </div>
+        {% endfor %}
+        {% if not top_products %}
+        <p class="text-muted small">No sales data yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerts -->
+{% if low_stock or out_of_stock %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Stock Alerts</h6>
+    <div class="row">
+      <div class="col-md-6">
+        {% if out_of_stock > 0 %}
+        <div class="alert alert-danger mb-2">
+          <strong>{{ out_of_stock }} product(s)</strong> are out of stock!
+          <a href="{{ url_for('admin.inventory') }}" class="alert-link ms-1">View Inventory</a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        {% if low_stock > 0 %}
+        <div class="alert alert-warning mb-2">
+          <strong>{{ low_stock }} product(s)</strong> have low stock.
+          <a href="{{ url_for('admin.inventory') }}" class="alert-link ms-1">Restock</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Orders -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between mb-3">
+      <h6 class="fw-bold mb-0">Recent Orders</h6>
+      <a href="{{ url_for('admin.orders') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light"><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for order in recent_orders %}
+          {% set status_colors = {'placed': 'primary', 'confirmed': 'info', 'packed': 'warning', 'out_for_delivery': 'primary', 'delivered': 'success', 'cancelled': 'danger'} %}
+          <tr>
+            <td><a href="{{ url_for('admin.orders') }}" class="fw-semibold text-decoration-none">#{{ order.order_number }}</a></td>
+            <td>{{ order.user.name }}</td>
+            <td>₹{{ order.total }}</td>
+            <td><span class="text-capitalize">{{ order.payment_method }}</span></td>
+            <td><span class="badge bg-{{ status_colors.get(order.status, 'secondary') }}">{{ order.STATUS_LABELS.get(order.status, order.status) }}</span></td>
+            <td><small class="text-muted">{{ order.created_at.strftime('%d %b') }}</small></td>
+            <td>
+              <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="post" class="d-flex gap-1">
+                <select name="status" class="form-select form-select-sm" style="width: auto;">
+                  {% for s, label in order.STATUS_LABELS.items() %}
+                  <option value="{{ s }}" {{ 'selected' if s == order.status }}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block admin_js %}
+<script>
+const daily = {{ daily_data | tojson }};
+const ctx = document.getElementById('revenueChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: daily.map(d => d.date),
+    datasets: [{
+      label: 'Revenue (₹)',
+      data: daily.map(d => d.revenue),
+      backgroundColor: 'rgba(13, 110, 253, 0.2)',
+      borderColor: 'rgba(13, 110, 253, 0.8)',
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '₹' + ctx.raw } } },
+    scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } }
+  }
+});
+</script>
+{% endblock %}

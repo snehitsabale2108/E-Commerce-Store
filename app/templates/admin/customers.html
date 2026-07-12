@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% block title %}Customers - Admin{% endblock %}
+{% block page_title %}Customer Management{% endblock %}
+{% block admin_content %}
+<div class="mb-4">
+  <form action="{{ url_for('admin.customers') }}" method="get" class="d-flex gap-2">
+    <input type="text" name="q" class="form-control" placeholder="Search by name or email..." value="{{ search }}">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+</div>
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light"><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Diet</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for customer in customers.items %}
+        <tr>
+          <td><strong>{{ customer.name }}</strong></td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.phone or '—' }}</td>
+          <td>{{ customer.orders.count() }}</td>
+          <td><span class="badge {{ 'bg-success' if customer.diet_preference == 'veg' else 'bg-danger' }}">{{ customer.diet_preference }}</span></td>
+          <td><small class="text-muted">{{ customer.created_at.strftime('%d %b %Y') }}</small></td>
+          <td>
+            <span class="badge {{ 'bg-success' if customer.is_active else 'bg-danger' }}">{{ 'Active' if customer.is_active else 'Blocked' }}</span>
+          </td>
+          <td>
+            <form action="{{ url_for('admin.toggle_customer', user_id=customer.id) }}" method="post">
+              <button type="submit" class="btn btn-sm {{ 'btn-outline-danger' if customer.is_active else 'btn-outline-success' }}">
+                {{ 'Block' if customer.is_active else 'Unblock' }}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

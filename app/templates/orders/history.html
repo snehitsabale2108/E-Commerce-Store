@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}My Orders - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="bi bi-bag-check me-2"></i>My Orders</h2>
+  {% if orders.items %}
+  {% for order in orders.items %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <strong>#{{ order.order_number }}</strong>
+        <span class="text-muted ms-2">{{ order.created_at.strftime('%d %b %Y') }}</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        {% set status_colors = {'placed': 'primary', 'confirmed': 'info', 'packed': 'warning', 'out_for_delivery': 'primary', 'delivered': 'success', 'cancelled': 'danger', 'refunded': 'secondary'} %}
+        <span class="badge bg-{{ status_colors.get(order.status, 'secondary') }} px-3 py-2">
+          {{ order.STATUS_LABELS.get(order.status, order.status) }}
+        </span>
+        <strong class="text-success">₹{{ order.total }}</strong>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-8">
+          <!-- Order items preview -->
+          <div class="d-flex gap-2 flex-wrap">
+            {% for item in order.items.limit(4) %}
+            <div class="text-center">
+              <img src="{{ url_for('static', filename='images/products/' + (item.product.image if item.product else 'default_product.png')) }}" 
+                   style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" alt="{{ item.product_name }}"
+                   onerror="this.src='{{ url_for('static', filename='images/default_product.png') }}'">
+              <p class="small text-muted mb-0" style="font-size: 0.75rem; max-width: 60px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{ item.product_name }}</p>
+            </div>
+            {% endfor %}
+            {% if order.items.count() > 4 %}
+            <div class="d-flex align-items-center justify-content-center bg-light rounded" style="width: 50px; height: 50px;">
+              <small class="text-muted">+{{ order.items.count() - 4 }}</small>
+            </div>
+            {% endif %}
+          </div>
+          <p class="text-muted small mt-2">{{ order.items.count() }} item(s) • {{ order.payment_method.upper() }} • {{ order.delivery_slot }}</p>
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-end gap-2">
+          <a href="{{ url_for('orders.track', order_number=order.order_number) }}" class="btn btn-outline-primary btn-sm">Track Order</a>
+          <form action="{{ url_for('orders.reorder', order_id=order.id) }}" method="post">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-arrow-repeat me-1"></i>Reorder</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  <!-- Pagination -->
+  {% if orders.pages > 1 %}
+  <nav><ul class="pagination justify-content-center">
+    {% if orders.has_prev %}<li class="page-item"><a class="page-link" href="?page={{ orders.prev_num }}">«</a></li>{% endif %}
+    {% for page in orders.iter_pages() %}
+      {% if page %}
+      <li class="page-item {{ 'active' if page == orders.page }}"><a class="page-link" href="?page={{ page }}">{{ page }}</a></li>
+      {% else %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+    {% endfor %}
+    {% if orders.has_next %}<li class="page-item"><a class="page-link" href="?page={{ orders.next_num }}">»</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-bag" style="font-size: 5rem; color: #ccc;"></i>
+    <h3 class="mt-4 text-muted">No orders yet</h3>
+    <p class="text-muted">Start shopping to see your orders here!</p>
+    <a href="{{ url_for('products.listing') }}" class="btn btn-primary btn-lg mt-2">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

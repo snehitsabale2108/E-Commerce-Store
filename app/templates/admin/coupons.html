@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% block title %}Coupons - Admin{% endblock %}
+{% block page_title %}Coupon Management{% endblock %}
+{% block admin_content %}
+<div class="row g-4">
+  <!-- Add Coupon -->
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3">Create Coupon</h6>
+        <form action="{{ url_for('admin.add_coupon') }}" method="post">
+          <div class="mb-2"><label class="form-label small fw-semibold">Code</label><input type="text" name="code" class="form-control" placeholder="e.g. SAVE20" required></div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Description</label><input type="text" name="description" class="form-control" placeholder="Optional"></div>
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Type</label>
+            <select name="discount_type" class="form-select">
+              <option value="percent">Percentage (%)</option>
+              <option value="flat">Flat Amount (₹)</option>
+            </select>
+          </div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Value</label><input type="number" name="discount_value" class="form-control" step="0.01" required></div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Min. Order Amount (₹)</label><input type="number" name="min_order_amount" class="form-control" value="0"></div>
+          <div class="mb-2"><label class="form-label small fw-semibold">Max Discount (₹)</label><input type="number" name="max_discount_amount" class="form-control" placeholder="Leave blank for unlimited"></div>
+          <div class="mb-3"><label class="form-label small fw-semibold">Usage Limit</label><input type="number" name="usage_limit" class="form-control" placeholder="Leave blank for unlimited"></div>
+          <button type="submit" class="btn btn-success w-100">Create Coupon</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Coupons List -->
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light"><tr><th>Code</th><th>Description</th><th>Discount</th><th>Min Order</th><th>Used</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            {% for coupon in coupons %}
+            <tr>
+              <td><strong class="text-primary">{{ coupon.code }}</strong></td>
+              <td><small>{{ coupon.description or '—' }}</small></td>
+              <td>
+                {% if coupon.discount_type == 'percent' %}{{ coupon.discount_value|int }}%{% else %}₹{{ coupon.discount_value }}{% endif %}
+                {% if coupon.max_discount_amount %}<br><small class="text-muted">Max ₹{{ coupon.max_discount_amount }}</small>{% endif %}
+              </td>
+              <td>₹{{ coupon.min_order_amount }}</td>
+              <td>{{ coupon.usage_count }}/{{ coupon.usage_limit or '∞' }}</td>
+              <td><span class="badge {{ 'bg-success' if coupon.is_active else 'bg-secondary' }}">{{ 'Active' if coupon.is_active else 'Inactive' }}</span></td>
+              <td>
+                <form action="{{ url_for('admin.delete_coupon', coupon_id=coupon.id) }}" method="post">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
