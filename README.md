@@ -178,46 +178,6 @@ AGENT_CONFIG = {
 
 ---
 
-## 🚀 Deployment
-
-### Option 1: Render.com (Free Tier)
-
-1. Push your code to GitHub
-2. Go to [render.com](https://render.com) → New → Web Service
-3. Connect your GitHub repo
-4. Set:
-   - **Build Command:** `pip install -r requirements.txt && python seed.py`
-   - **Start Command:** `gunicorn run:app`
-5. Add environment variables in Render Dashboard → Environment
-6. Deploy!
-
-### Option 2: IBM Cloud Code Engine
-
-```bash
-# Install IBM Cloud CLI
-ibmcloud login
-ibmcloud target -r us-south -g default
-
-# Build & push container
-ibmcloud ce application create \
-  --name freshmart \
-  --image us.icr.io/your-namespace/freshmart:latest \
-  --port 5000 \
-  --env-from-secret freshmart-secrets
-```
-
-### Option 3: Railway.app
-
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-railway login
-railway init
-railway up
-```
-
-Set environment variables in Railway Dashboard → Variables.
-
 ### Production Environment Variables
 ```env
 FLASK_ENV=production
@@ -265,12 +225,6 @@ The seed script creates:
 3. Commit: `git commit -m "Add my feature"`
 4. Push: `git push origin feature/my-feature`
 5. Open a Pull Request
-
----
-
-## 📄 License
-
-MIT License — free to use for personal and commercial projects.
 
 ---
 
