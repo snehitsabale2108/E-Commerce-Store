@@ -36,10 +36,6 @@ instance/
 # --- Flask-Migrate (keep versions, ignore __pycache__ inside) ---
 migrations/__pycache__/
 
-# --- Uploads ---
-app/static/images/products/
-!app/static/images/products/.gitkeep
-
 # --- Logs ---
 *.log
 logs/

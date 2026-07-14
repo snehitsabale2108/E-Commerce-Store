@@ -104,6 +104,12 @@ def products():
     categories = Category.query.all()
     return render_template('admin/products.html', products=products, categories=categories, search=search)
 
+def _compute_discount(price, mrp):
+    """Discount % is always derived from MRP and Selling Price, so it can
+    never drift out of sync with what the customer is actually charged."""
+    if mrp and mrp > 0 and price <= mrp:
+        return round((1 - price / mrp) * 100, 1)
+    return 0.0
 
 @admin_bp.route('/products/add', methods=['GET', 'POST'])
 @admin_required
@@ -139,8 +145,10 @@ def add_product():
             sku=request.form.get('sku', ''),
             price=float(request.form.get('price', 0)),
             mrp=float(request.form.get('mrp', 0)) or None,
-            discount_percent=float(request.form.get('discount_percent', 0)),
+            discount_percent=_compute_discount(float(request.form.get('price', 0)), float(request.form.get('mrp', 0)) or 0),
             stock=int(request.form.get('stock', 0)),
+            rating_avg=float(request.form.get('rating_avg', 0) or 0),
+            rating_count=int(request.form.get('rating_count', 0) or 0),
             unit=request.form.get('unit', 'piece'),
             image=image_filename,
             is_veg=request.form.get('is_veg') == 'true',
@@ -170,8 +178,10 @@ def edit_product(product_id):
         product.brand = request.form.get('brand', product.brand)
         product.price = float(request.form.get('price', product.price))
         product.mrp = float(request.form.get('mrp', 0)) or None
-        product.discount_percent = float(request.form.get('discount_percent', 0))
+        product.discount_percent = _compute_discount(product.price, product.mrp or 0)
         product.stock = int(request.form.get('stock', product.stock))
+        product.rating_avg = float(request.form.get('rating_avg', product.rating_avg) or 0)
+        product.rating_count = int(request.form.get('rating_count', product.rating_count) or 0)
         product.unit = request.form.get('unit', product.unit)
         product.is_veg = request.form.get('is_veg') == 'true'
         product.is_featured = bool(request.form.get('is_featured'))

@@ -174,8 +174,6 @@ class Product(db.Model):
 
     @property
     def effective_price(self):
-        if self.discount_percent:
-            return round(self.price * (1 - self.discount_percent / 100), 2)
         return self.price
 
     def to_dict(self):

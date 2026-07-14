@@ -19,9 +19,23 @@
             <p class="text-muted small mb-2">{{ product.unit }}</p>
             <div class="d-flex align-items-center mb-2">
                 <span class="text-warning me-1">
+                    {% set whole = product.rating_avg|int %}
+                    {% set decimal = product.rating_avg - whole %}
+                    {% if decimal > 0.75 %}
+                        {% set full_stars = whole + 1 %}
+                        {% set half_star = false %}
+                    {% elif decimal >= 0.25 %}
+                        {% set full_stars = whole %}
+                        {% set half_star = true %}
+                    {% else %}
+                        {% set full_stars = whole %}
+                        {% set half_star = false %}
+                    {% endif %}
                     {% for i in range(5) %}
-                        {% if i < product.rating_avg|int %}
+                        {% if i < full_stars %}
                         <i class="bi bi-star-fill"></i>
+                        {% elif i == full_stars and half_star %}
+                        <i class="bi bi-star-half"></i>
                         {% else %}
                         <i class="bi bi-star"></i>
                         {% endif %}

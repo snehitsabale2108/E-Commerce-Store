@@ -87,7 +87,7 @@
             {% elif search_query %}Search: "{{ search_query }}"
             {% else %}All Products{% endif %}
           </h4>
-          <small class="text-muted">{{ products.total }} products found</small>
+          <small class="text-muted">Showing {{ ((products.page - 1) * products.per_page) + 1 }}-{{ [products.page * products.per_page, products.total]|min }} of {{ products.total }} products</small>
         </div>
         <!-- Mobile Filter Button -->
         <button class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
@@ -128,20 +128,26 @@
       {% if products.pages > 1 %}
       <nav class="mt-5">
         <ul class="pagination justify-content-center">
+          {% set base_args = dict(request.args) %}
           {% if products.has_prev %}
-          <li class="page-item"><a class="page-link" href="?{{ request.query_string.decode().replace('page='+products.page|string, 'page='+(products.page-1)|string) }}">«</a></li>
+          {% set _ = base_args.update({'page': products.page - 1}) %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, **base_args) }}">«</a></li>
           {% endif %}
           {% for page in products.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
             {% if page %}
+            {% set page_args = dict(request.args) %}
+            {% set _ = page_args.update({'page': page}) %}
             <li class="page-item {{ 'active' if page == products.page }}">
-              <a class="page-link" href="?{{ request.query_string.decode().replace('page='+products.page|string, 'page='+page|string) }}">{{ page }}</a>
+              <a class="page-link" href="{{ url_for(request.endpoint, **page_args) }}">{{ page }}</a>
             </li>
             {% else %}
             <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
           {% endfor %}
           {% if products.has_next %}
-          <li class="page-item"><a class="page-link" href="?{{ request.query_string.decode() }}&page={{ products.page+1 }}">»</a></li>
+          {% set next_args = dict(request.args) %}
+          {% set _ = next_args.update({'page': products.page + 1}) %}
+          <li class="page-item"><a class="page-link" href="{{ url_for(request.endpoint, **next_args) }}">»</a></li>
           {% endif %}
         </ul>
       </nav>
