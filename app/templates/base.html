@@ -115,7 +115,6 @@
             <div class="ai-chat-header">
                 <div>
                     <h6 class="mb-0"><i class="bi bi-robot me-2"></i>Freshie - AI Assistant</h6>
-                    <small class="text-muted">Powered by IBM Watsonx.ai</small>
                 </div>
                 <button class="btn-close btn-close-white" id="aiChatClose"></button>
             </div>
@@ -168,26 +167,23 @@
                 <div class="col-md-3 mb-4">
                     <h6 class="fw-bold mb-3">Customer Care</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-white-75 text-decoration-none">Help Center</a></li>
-                        <li><a href="#" class="text-white-75 text-decoration-none">Track Order</a></li>
-                        <li><a href="#" class="text-white-75 text-decoration-none">Return Policy</a></li>
-                        <li><a href="#" class="text-white-75 text-decoration-none">Contact Us</a></li>
+                        <li><a href="{{ url_for('main.help_center') }}" class="text-white-75 text-decoration-none">Help Center</a></li>
+                        <li><a href="{{ url_for('orders.history') }}" class="text-white-75 text-decoration-none">Track Order</a></li>
+                        <li><a href="{{ url_for('main.return_policy') }}" class="text-white-75 text-decoration-none">Return Policy</a></li>
+                        <li><a href="{{ url_for('main.contact_us') }}" class="text-white-75 text-decoration-none">Contact Us</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3 mb-4">
                     <h6 class="fw-bold mb-3">Contact</h6>
                     <p class="text-white-75 mb-2"><i class="bi bi-telephone me-2"></i>1800-123-4567</p>
-                    <p class="text-white-75 mb-2"><i class="bi bi-envelope me-2"></i>support@freshmart.com</p>
+                    <p class="text-white-75 mb-2"><i class="bi bi-envelope me-2"></i><a href="mailto:support@freshmart.com" class="text-white-75 text-decoration-none">support@freshmart.com</a></p>
                     <p class="text-white-75 mb-0"><i class="bi bi-clock me-2"></i>24/7 Support</p>
                 </div>
             </div>
             <hr class="border-secondary">
             <div class="row">
                 <div class="col-md-6 text-center text-md-start">
-                    <p class="text-white-75 mb-0">&copy; 2025 {{ app_name }}. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <p class="text-white-75 mb-0">Powered by IBM Watsonx.ai 🤖</p>
+                    <p class="text-white-75 mb-0">&copy; 2026 {{ app_name }}. All rights reserved.</p>
                 </div>
             </div>
         </div>

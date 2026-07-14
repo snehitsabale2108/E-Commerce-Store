@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Help Center - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Help Center</h2>
+
+    <div class="accordion" id="helpAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    How do I track my order?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                    Go to <a href="{{ url_for('orders.history') }}">My Orders</a> and click "Track Order" next to the order you want to check.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                    What payment methods do you accept?
+                </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                    We accept UPI, credit/debit cards, net banking, and cash on delivery.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                    How do I cancel an order?
+                </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                    Go to <a href="{{ url_for('orders.history') }}">My Orders</a> and click "Cancel" on the order, available before it ships.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                    What is your return policy?
+                </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                    See our full <a href="{{ url_for('main.return_policy') }}">Return Policy</a> page for details.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-4 text-muted">Still need help? <a href="{{ url_for('main.contact_us') }}">Contact us</a> and we'll get back to you.</p>
+</div>
+{% endblock %}

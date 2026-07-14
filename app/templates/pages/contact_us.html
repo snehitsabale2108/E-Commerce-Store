@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Contact Us</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p class="mb-2"><i class="bi bi-telephone me-2"></i><a href="tel:18001234567" class="text-decoration-none">1800-123-4567</a></p>
+            <p class="mb-2"><i class="bi bi-envelope me-2"></i><a href="mailto:support@freshmart.com" class="text-decoration-none">support@freshmart.com</a></p>
+            <p class="mb-4"><i class="bi bi-clock me-2"></i>24/7 Support</p>
+        </div>
+
+        <div class="col-md-6">
+            <form method="POST" action="{{ url_for('main.contact_us') }}">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" name="message" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

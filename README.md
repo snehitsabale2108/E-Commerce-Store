@@ -114,8 +114,8 @@ python run.py
 Open your browser at: **http://localhost:5000**
 
 **Demo credentials:**
-- Customer: `priya@example.com` / `demo1234`
-- Admin: `admin@freshmart.com` / `admin123`
+- Customer: `priya@freshmart.com` / `Priya@123`
+- Admin: `admin@freshmart.com` / `Admin@123`
 
 ---
 

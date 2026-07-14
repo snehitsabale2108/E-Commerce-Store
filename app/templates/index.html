@@ -25,9 +25,13 @@
                                 </a>
                             </div>
                             <div class="col-lg-6 text-center d-none d-lg-block" data-aos="fade-left">
+                                {% if banner.image %}
+                                <img src="{{ url_for('static', filename='images/banners/' + banner.image) }}" alt="{{ banner.title }}" class="img-fluid" style="max-height: 380px;">
+                                {% else %}
                                 <div class="hero-image-placeholder">
                                     <i class="bi bi-basket3" style="font-size: 10rem; color: rgba(255,255,255,0.3);"></i>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

@@ -223,9 +223,9 @@ def seed():
 
         # ── Banners ────────────────────────────────────────────
         banners = [
-            Banner(title='Farm Fresh, Delivered Fast', subtitle='Get the freshest fruits & vegetables at your doorstep in under 2 hours', link='/products/?category=fruits-vegetables', button_text='Shop Fresh', bg_color='#1a472a', text_color='#ffffff', display_order=1, is_active=True),
-            Banner(title='10% Off on Your First Order', subtitle='Use code FRESH10 at checkout. Min order ₹200', link='/products/', button_text='Order Now', bg_color='#1a237e', text_color='#ffffff', display_order=2, is_active=True),
-            Banner(title='Premium Dairy Every Morning', subtitle='Amul, Mother Dairy & more. Fresh milk at your door by 7 AM', link='/products/?category=dairy-eggs', button_text='Subscribe Now', bg_color='#0d47a1', text_color='#ffffff', display_order=3, is_active=True),
+            Banner(title='Farm Fresh, Delivered Fast', subtitle='Get the freshest fruits & vegetables at your doorstep in under 2 hours', image='shop_fresh.png', link='/products/?category=fruits-vegetables', button_text='Shop Fresh', bg_color='#1a472a', text_color='#ffffff', display_order=1, is_active=True),
+            Banner(title='10% Off on Your First Order', subtitle='Use code FRESH10 at checkout. Min order ₹200', image='order_now.png', link='/products/', button_text='Order Now', bg_color='#1a237e', text_color='#ffffff', display_order=2, is_active=True),
+            Banner(title='Premium Dairy Every Morning', subtitle='Amul, Mother Dairy & more. Fresh milk at your door by 7 AM', image='subscribe_now.png', link='/products/?category=dairy-eggs', button_text='Subscribe Now', bg_color='#0d47a1', text_color='#ffffff', display_order=3, is_active=True),
         ]
         for b in banners:
             db.session.add(b)

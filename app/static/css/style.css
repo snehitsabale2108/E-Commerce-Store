@@ -679,3 +679,12 @@ footer .social-links a:hover { opacity: 1; transform: translateY(-2px); }
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* Hero carousel arrow position */
+.hero-section .carousel-control-prev {
+  left: -45px;
+}
+
+.hero-section .carousel-control-next {
+  right: -45px;
+}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Return Policy - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Return Policy</h2>
+
+    <p>We want you to be happy with every order. If something isn't right, here's how returns work at {{ app_name }}.</p>
+
+    <h5 class="fw-bold mt-4">Eligibility</h5>
+    <ul>
+        <li>Returns must be requested within 24 hours of delivery for perishable items (fruits, vegetables, dairy).</li>
+        <li>Non-perishable items can be returned within 7 days of delivery, unopened and in original packaging.</li>
+        <li>Items must not be used, damaged, or missing parts.</li>
+    </ul>
+
+    <h5 class="fw-bold mt-4">How to Request a Return</h5>
+    <ol>
+        <li>Go to <a href="{{ url_for('orders.history') }}">My Orders</a>.</li>
+        <li>Select the order and item you want to return.</li>
+        <li>Choose a reason and submit the request.</li>
+    </ol>
+
+    <h5 class="fw-bold mt-4">Refunds</h5>
+    <p>Once your return is approved, refunds are processed to your original payment method within 5-7 business days.</p>
+
+    <p class="mt-4 text-muted">Questions? <a href="{{ url_for('main.contact_us') }}">Contact us</a> anytime.</p>
+</div>
+{% endblock %}
